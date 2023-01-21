@@ -1,0 +1,26 @@
+{
+  "name": "itmo_tourist_bot_ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev src/index.ts",
+    "typeorm": "ts-node ./node_modules/.bin/typeorm ormconfig.ts",
+    "migration:generate": "npm run typeorm migration:generate -n",
+    "migration:blank": "npm run typeorm migration:create -n"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "pg": "^8.8.0",
+    "telegraf": "^4.11.2",
+    "typeorm": "^0.3.11"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.18"
+  }
+}
