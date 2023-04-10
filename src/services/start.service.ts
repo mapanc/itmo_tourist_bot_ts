@@ -9,7 +9,6 @@ import { UserEvent } from "../entity/event.entity";
 
 export const onStart = async (bot: Telegraf<Context<Update>>) => {
   const onStart = async (ctx: Context) => {
-    console.log(ctx);
     let user = await UserRepository.findOne({
       where: { telegramId: ctx.from.id },
       relations: ["city"],
@@ -24,7 +23,18 @@ export const onStart = async (bot: Telegraf<Context<Update>>) => {
       newUser.lang = ctx.from.language_code;
       user = await UserRepository.save(newUser);
     }
-    ctx.replyWithHTML(`<b>Hi, ${user.fullname || user.username}</b>!`);
+    ctx.replyWithHTML(
+      `<b>Привет, ${user.fullname || user.username}</b>
+    Спасибо, что вы решили воспользоваться нашим ботом. 
+    Для новых пользователей: перед тем, как начать работу, выберите город своего проживания. Это поможет нам для сбора статистики в сфере туризма.`,
+      {
+        ...Markup.keyboard([
+          Markup.button.locationRequest("Отправить гео-локацию"),
+        ])
+          .resize()
+          .oneTime(),
+      }
+    );
     if (!user.city) {
       const regions = await CityRepository.createQueryBuilder("c")
         .select("c.region", "region")
@@ -37,17 +47,13 @@ export const onStart = async (bot: Telegraf<Context<Update>>) => {
       ctx.replyWithHTML(regionsHtml);
     }
     if ((ctx as any).startPayload) {
-      console.log((ctx as any).startPayload);
       const event = await EventRepository.findOne({
         where: {
           utm: (ctx as any).startPayload,
         },
       });
-      console.log(event);
       if (event) {
-        const user = await UserRepository.findOne({
-          where: { telegramId: ctx.from.id },
-        });
+        await UserRepository.save({ ...user, event });
         await UserEventRepository.save({
           userId: user.id,
           eventId: event.id,
@@ -94,6 +100,14 @@ export const onStart = async (bot: Telegraf<Context<Update>>) => {
       { city: cities[index - 1] }
     );
   };
+
+  const onHelp = async (ctx: Context) => {
+    ctx.replyWithHTML(
+      `Привет! Этот бот создан для отметки твоей локации на этом мероприятия\nЭти данные используются для анализа статистики заинтересованности в нашем мероприятии\nСпасибо:)`
+    );
+  };
+
+  bot.help(onHelp);
 
   bot.start(onStart);
   bot.action(/start/gm, onStart);

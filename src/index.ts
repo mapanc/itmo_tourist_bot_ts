@@ -5,6 +5,7 @@ import AppDataSource from "./repositories/index.db";
 import UserRepository from "./repositories/User.repository";
 import { onLocation } from "./services/location.service";
 import { createEvent } from "./services/createEvent.service";
+import { startCron } from "./cron/cron";
 dotenv.config();
 
 const TG_API_KEY = process.env.TG_API_KEY || "";
@@ -22,6 +23,8 @@ const main = async () => {
   bot = await onStart(bot);
   bot = await onLocation(bot);
   bot = await createEvent(bot);
+
+  startCron(bot);
 
   bot.launch();
 };

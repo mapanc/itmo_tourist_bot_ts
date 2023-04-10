@@ -20,6 +20,9 @@ export class User extends BaseEntity {
   @ManyToOne(() => City, { nullable: true })
   city: City;
 
+  @ManyToOne(() => Event, { nullable: true })
+  event: Event;
+
   @JoinTable({ name: "user_event" })
   events: Event[];
 

@@ -33,12 +33,13 @@ export class Event extends BaseEntity {
   @JoinTable({ name: "user_event" })
   users: User[];
 }
-
+//журнал посещения о меропритии
 @Entity("user_event")
 export class UserEvent {
+  //уникальная запись на мероприятие
   @PrimaryColumn()
   userId: string;
-
+  //
   @PrimaryColumn()
   eventId: string;
 

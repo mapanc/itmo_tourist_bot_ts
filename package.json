@@ -15,10 +15,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/cron": "^2.0.0",
+    "cron": "^2.2.0",
+    "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "pg": "^8.8.0",
     "telegraf": "^4.11.2",
-    "typeorm": "^0.3.11"
+    "typeorm": "^0.3.11",
+    "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {
     "@types/node": "^18.11.18"

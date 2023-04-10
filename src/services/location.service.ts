@@ -9,35 +9,48 @@ import UserLocationRepository from "../repositories/UserLocation.repository";
 
 export const onLocation = (bot: Telegraf<Context<Update>>) => {
   const onLocation = async (ctx: Context) => {
-    ctx.replyWithHTML("Выши данные были записаны!", {
-      ...Markup.inlineKeyboard([
-        Markup.button.callback("Моя локация", "my_location"),
-      ]),
-    });
     const user = await UserRepository.findOne({
       where: { telegramId: ctx.from.id },
+      relations: ["event"],
     });
-    const userEvent = await UserEventRepository.findOne({
-      where: { userId: user.id },
-      order: { modified: "desc" },
-    });
-    const event = await EventRepository.findOne({
-      where: { id: userEvent.eventId },
-    });
-    const userLocation = {
-      user,
-      longitude: (ctx.message as any).location.longitude,
-      latitude: (ctx.message as any).location.latitude,
-    } as UserLocation;
-    if (
-      Math.abs(userLocation.longitude - event.longitude) > event.different &&
-      Math.abs(userLocation.latitude - event.latitude) > event.different
-    ) {
-      ctx.replyWithHTML(`Вы находитесь слишком далеко`);
-    } else {
-      ctx.replyWithHTML(`Данные успешно записаны.`);
-      await UserLocationRepository.save(userLocation);
+    if (user.event) {
+      const event = await EventRepository.findOne({
+        where: { id: user.event.id },
+      });
+      const userLocation = {
+        user,
+        longitude: (ctx.message as any).location.longitude,
+        latitude: (ctx.message as any).location.latitude,
+      } as UserLocation;
+      if (
+        Math.abs(userLocation.longitude - event.longitude) > event.different &&
+        Math.abs(userLocation.latitude - event.latitude) > event.different
+      ) {
+        ctx.replyWithHTML(
+          `Вы находитесь слишком далеко. Данные не были записаны!`,
+          {
+            ...Markup.inlineKeyboard([
+              Markup.button.callback("Моя последняя локация", "my_location"),
+            ]),
+          }
+        );
+      } else {
+        ctx.replyWithHTML(
+          `Вы находитесь в границах мероприятия. Данные успешно записаны.`,
+          {
+            ...Markup.inlineKeyboard([
+              Markup.button.callback("Моя локация", "my_location"),
+            ]),
+          }
+        );
+        await UserLocationRepository.save(userLocation);
+      }
     }
+    // ctx.replyWithHTML("Выши данные были записаны!", {
+    //   ...Markup.inlineKeyboard([
+    //     Markup.button.callback("Моя локация", "my_location"),
+    //   ]),
+    // });
   };
 
   const onMyLocation = async (ctx: Context) => {
